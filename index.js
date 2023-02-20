@@ -2,10 +2,10 @@
 
 const express = require('express');
 const app = express();
-
 const handlebars = require('express-handlebars')
 const bodyParser = require('body-parser')
-const Sequelize = require('sequelize');
+const Post = require('./models/Post')
+
 
 
 // Config
@@ -20,21 +20,30 @@ const Sequelize = require('sequelize');
     extended: true
     }));
 
-    // conexão banco de dandos PostgreSQL
-    const sequelize = new Sequelize('testesequelize', 'postgres', '123', {
-        host: "localhost",
-        dialect: "postgres"
-    });
 
 
 // Rotas
+
+app.get("/", function(req, res){
+    Post.findAll({order: [['id', 'DESC']]}).then(function(posts){
+        res.render('home', {posts: posts})
+    })   
+});
+
 app.get("/cadastro", function(req, res){
     res.render('formulario')
 });
 
 app.post("/cadastro_enviado", function(req, res){
 
-    res.send(`Título: ${req.body.titulo}\nConteúdo: ${req.body.conteudo} `)
+    Post.create({
+        titulo: req.body.titulo,
+        conteudo: req.body.conteudo
+    }).then(function(){
+        res.redirect('/')
+    }).catch(erro => {res.send('erro na criação do post: ' + erro)})
+
+   
 });
 
 
